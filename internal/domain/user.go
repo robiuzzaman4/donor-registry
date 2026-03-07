@@ -16,7 +16,6 @@ const (
 	ABPositive UserBloodGroup = "AB+"
 	ABNegative UserBloodGroup = "AB-"
 )
-
 const (
 	RoleAdmin UserRole = "ADMIN"
 	RoleUser  UserRole = "USER"
@@ -33,7 +32,7 @@ type UserAddress struct {
 }
 
 type User struct {
-	ID               int            `json:"id" db:"id"`
+	ID               string         `json:"id" db:"id"`
 	Name             string         `json:"name" db:"name"`
 	Phone            string         `json:"phone" db:"phone"`
 	Password         string         `json:"-" db:"password"`
@@ -41,9 +40,9 @@ type User struct {
 	Role             UserRole       `json:"role" db:"role"`
 	Gender           UserGender     `json:"gender" db:"gender"`
 	DateOfBirth      time.Time      `json:"dateOfBirth" db:"date_of_birth"`
-	IsVerified       bool           `json:"isVerified" db:"is_verified"`
 	Address          UserAddress    `json:"address" db:"address"`
 	TotalDonateCount int            `json:"totalDonateCount" db:"total_donate_count"`
+	IsVerified       bool           `json:"isVerified" db:"is_verified"`
 	IsAvailable      bool           `json:"isAvailable" db:"is_available"`
 	LastDonatedAt    time.Time      `json:"lastDonatedAt" db:"last_donated_at"`
 	CreatedAt        time.Time      `json:"createdAt" db:"created_at"`
