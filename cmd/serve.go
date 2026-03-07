@@ -7,6 +7,7 @@ import (
 
 	"github.com/robiuzzaman4/donor-registry-backend/internal/config"
 	"github.com/robiuzzaman4/donor-registry-backend/internal/infrastructure/db"
+	"github.com/robiuzzaman4/donor-registry-backend/internal/rest"
 )
 
 func Serve() {
@@ -16,7 +17,7 @@ func Serve() {
 	// context
 	ctx := context.Background()
 
-	// db conn
+	// db connection
 	dbConn, err := db.NewConnection(ctx, cnf.DbUrl)
 	if err != nil {
 		fmt.Println(err)
@@ -25,4 +26,7 @@ func Serve() {
 
 	fmt.Println("Database connected:", dbConn)
 
+	// start server
+	server := rest.NewServer(cnf)
+	server.Start()
 }

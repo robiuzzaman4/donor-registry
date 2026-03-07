@@ -16,7 +16,6 @@ const (
 )
 
 func NewConnection(ctx context.Context, dbUrl string) (*pgxpool.Pool, error) {
-
 	// parse db url and create pool configuration
 	poolCnf, err := pgxpool.ParseConfig(dbUrl)
 	if err != nil {
