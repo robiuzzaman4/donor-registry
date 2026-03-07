@@ -44,6 +44,7 @@ type User struct {
 	TotalDonateCount int            `json:"totalDonateCount" db:"total_donate_count"`
 	IsVerified       bool           `json:"isVerified" db:"is_verified"`
 	IsAvailable      bool           `json:"isAvailable" db:"is_available"`
+	IsDeleted        bool           `json:"IsDeleted" db:"is_deleted"`
 	LastDonatedAt    time.Time      `json:"lastDonatedAt" db:"last_donated_at"`
 	CreatedAt        time.Time      `json:"createdAt" db:"created_at"`
 	UpdatedAt        time.Time      `json:"updatedAt" db:"updated_at"`
