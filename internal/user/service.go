@@ -30,8 +30,14 @@ func (svc service) GetByPhone(ctx context.Context, phone string) (*domain.User, 
 	return svc.userRepo.GetByPhone(ctx, phone)
 }
 
-func (svc service) List(ctx context.Context) ([]*domain.User, error) {
-	return svc.userRepo.List(ctx)
+func (s *service) List(ctx context.Context, page, limit int) ([]*domain.User, int64, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 10
+	}
+	return s.userRepo.List(ctx, page, limit)
 }
 
 func (svc service) FindByPhoneAndPassword(ctx context.Context, phone string, password string) (*domain.User, error) {

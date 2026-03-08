@@ -89,17 +89,30 @@ func (r *userRepo) GetByPhone(ctx context.Context, phone string) (*domain.User, 
 	return &u, nil
 }
 
-func (r *userRepo) List(ctx context.Context) ([]*domain.User, error) {
+func (r *userRepo) List(ctx context.Context, page, limit int) ([]*domain.User, int64, error) {
+	// get total count for pagination metadata
+	var total int64
+	countQuery := `SELECT COUNT(id) FROM users WHERE is_deleted = false`
+	err := r.db.QueryRow(ctx, countQuery).Scan(&total)
+	if err != nil {
+		return nil, 0, fmt.Errorf("Failed to count users: %w", err)
+	}
+
+	// calculate offset internally
+	offset := (page - 1) * limit
+
+	// execute paginated query
 	query := `
 		SELECT id, name, phone, blood_group, gender, zila, upazila, local_address, 
 		       total_donate_count, is_available, last_donated_at
 		FROM users 
 		WHERE is_deleted = false
-		ORDER BY created_at DESC LIMIT 50`
+		ORDER BY created_at DESC 
+		LIMIT $1 OFFSET $2`
 
-	rows, err := r.db.Query(ctx, query)
+	rows, err := r.db.Query(ctx, query, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to list users: %w", err)
+		return nil, 0, fmt.Errorf("Failed to list users: %w", err)
 	}
 	defer rows.Close()
 
@@ -107,16 +120,17 @@ func (r *userRepo) List(ctx context.Context) ([]*domain.User, error) {
 	for rows.Next() {
 		var u domain.User
 		err := rows.Scan(
-			&u.ID, &u.Name, &u.BloodGroup, &u.Gender, &u.Address.Zila, &u.Address.Upazila,
+			&u.ID, &u.Name, &u.Phone, &u.BloodGroup, &u.Gender,
+			&u.Address.Zila, &u.Address.Upazila, &u.Address.LocalAddress,
 			&u.TotalDonateCount, &u.IsAvailable, &u.LastDonatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		users = append(users, &u)
 	}
 
-	return users, nil
+	return users, total, nil
 }
 
 func (r *userRepo) FindByPhoneAndPassword(ctx context.Context, phone string, password string) (*domain.User, error) {

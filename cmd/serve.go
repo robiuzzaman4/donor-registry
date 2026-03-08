@@ -24,9 +24,7 @@ func Serve() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Database connected:", dbConn)
-
 	// start server
-	server := rest.NewServer(cnf)
+	server := rest.NewServer(cnf, ctx, dbConn)
 	server.Start()
 }
