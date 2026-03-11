@@ -31,12 +31,6 @@ func (svc service) GetByPhone(ctx context.Context, phone string) (*domain.User, 
 }
 
 func (s *service) List(ctx context.Context, page, limit int) ([]*domain.User, int64, error) {
-	if page <= 0 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 10
-	}
 	return s.userRepo.List(ctx, page, limit)
 }
 

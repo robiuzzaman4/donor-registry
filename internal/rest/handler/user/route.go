@@ -11,5 +11,7 @@ func RegisterPublicRoutes(r *gin.RouterGroup, h *Handler) {
 		public.POST("/register", h.Register)
 		public.POST("/login", h.Login)
 		public.GET("/", h.List)
+
+		public.GET("/:id", h.GetByID)
 	}
 }

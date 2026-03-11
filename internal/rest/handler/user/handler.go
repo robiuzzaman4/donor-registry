@@ -76,3 +76,58 @@ func (h *Handler) List(c *gin.Context) {
 	pagination := response.BuildPagination(total, page, limit)
 	response.SuccessWithPagination(c, "Donors retrieved successfully", users, pagination)
 }
+
+// get by id
+func (h *Handler) GetByID(c *gin.Context) {
+	userID, isFound := c.Params.Get("userID")
+	if userID == "" || !isFound {
+		response.BadRequest(c, "UserID is required")
+		return
+	}
+
+	user, err := h.svc.GetByID(c, userID)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+	response.SuccessWithMessage(c, "User retrived", user)
+}
+
+// get by phone
+func (h *Handler) GetByPhone(c *gin.Context) {
+	phone, isFound := c.Params.Get("phone")
+	if phone == "" || !isFound {
+		response.BadRequest(c, "Phone is required")
+		return
+	}
+
+	user, err := h.svc.GetByPhone(c, phone)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+	response.SuccessWithMessage(c, "User retrived", user)
+}
+
+// update
+func (h *Handler) Update(c *gin.Context) {
+	userID, isFound := c.Params.Get("userID")
+	if userID == "" || !isFound {
+		response.BadRequest(c, "UserID is required")
+		return
+	}
+
+	var req domain.User
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request body")
+		return
+	}
+
+	err := h.svc.Update(c.Request.Context(), userID, &req)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.SuccessWithMessage(c, "User Updated", &req)
+}
