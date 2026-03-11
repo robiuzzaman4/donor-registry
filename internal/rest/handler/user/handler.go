@@ -5,6 +5,7 @@ import (
 	"github.com/robiuzzaman4/donor-registry-backend/internal/config"
 	"github.com/robiuzzaman4/donor-registry-backend/internal/domain"
 	"github.com/robiuzzaman4/donor-registry-backend/internal/rest/response"
+	"github.com/robiuzzaman4/donor-registry-backend/internal/util"
 )
 
 type Handler struct {
@@ -27,6 +28,13 @@ func (h *Handler) Register(c *gin.Context) {
 		response.BadRequest(c, "Invalid request body")
 		return
 	}
+
+	hashedPassword, err := util.HashPassword(req.Password)
+	if err != nil {
+		response.BadRequest(c, "Failed to process password")
+		return
+	}
+	req.Password = hashedPassword
 
 	res, err := h.svc.Create(c.Request.Context(), &req)
 	if err != nil {

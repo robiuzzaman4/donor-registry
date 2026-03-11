@@ -25,12 +25,6 @@ const (
 	Female UserGender = "FEMALE"
 )
 
-type UserAddress struct {
-	Zila         string `json:"zila" db:"zila"`
-	Upazila      string `json:"upazila" db:"upazila"`
-	LocalAddress string `json:"localAddress" db:"local_address"`
-}
-
 type User struct {
 	ID               string         `json:"id" db:"id"`
 	Name             string         `json:"name" db:"name"`
@@ -40,7 +34,9 @@ type User struct {
 	Role             UserRole       `json:"role" db:"role"`
 	Gender           UserGender     `json:"gender" db:"gender"`
 	DateOfBirth      time.Time      `json:"dateOfBirth" db:"date_of_birth"`
-	Address          UserAddress    `json:"address" db:"address"`
+	Zila             string         `json:"zila" db:"zila"`
+	Upazila          string         `json:"upazila" db:"upazila"`
+	LocalAddress     string         `json:"localAddress" db:"local_address"`
 	TotalDonateCount int            `json:"totalDonateCount" db:"total_donate_count"`
 	IsVerified       bool           `json:"isVerified" db:"is_verified"`
 	IsAvailable      bool           `json:"isAvailable" db:"is_available"`

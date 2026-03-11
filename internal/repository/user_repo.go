@@ -32,7 +32,7 @@ func (r *userRepo) Create(ctx context.Context, u *domain.User) (*domain.User, er
 
 	err := r.db.QueryRow(ctx, query,
 		u.Name, u.Phone, u.Password, u.BloodGroup, u.Role, u.Gender,
-		u.DateOfBirth, u.Address.Zila, u.Address.Upazila, u.Address.LocalAddress, u.IsAvailable,
+		u.DateOfBirth, u.Zila, u.Upazila, u.LocalAddress, u.IsAvailable,
 	).Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt)
 
 	if err != nil {
@@ -53,7 +53,7 @@ func (r *userRepo) GetByID(ctx context.Context, userID string) (*domain.User, er
 
 	err := r.db.QueryRow(ctx, query, userID).Scan(
 		&u.ID, &u.Name, &u.Phone, &u.Password, &u.BloodGroup, &u.Role, &u.Gender, &u.DateOfBirth,
-		&u.Address.Zila, &u.Address.Upazila, &u.Address.LocalAddress,
+		&u.Zila, &u.Upazila, &u.LocalAddress,
 		&u.TotalDonateCount, &u.IsVerified, &u.IsAvailable, &u.LastDonatedAt, &u.CreatedAt, &u.UpdatedAt,
 	)
 
@@ -76,7 +76,7 @@ func (r *userRepo) GetByPhone(ctx context.Context, phone string) (*domain.User, 
 
 	err := r.db.QueryRow(ctx, query, phone).Scan(
 		&u.ID, &u.Name, &u.Phone, &u.Password, &u.BloodGroup, &u.Role, &u.Gender,
-		&u.Address.Zila, &u.Address.Upazila, &u.Address.LocalAddress,
+		&u.Zila, &u.Upazila, &u.LocalAddress,
 		&u.TotalDonateCount, &u.IsAvailable, &u.LastDonatedAt, &u.CreatedAt, &u.UpdatedAt,
 	)
 
@@ -121,7 +121,7 @@ func (r *userRepo) List(ctx context.Context, page, limit int) ([]*domain.User, i
 		var u domain.User
 		err := rows.Scan(
 			&u.ID, &u.Name, &u.Phone, &u.BloodGroup, &u.Gender,
-			&u.Address.Zila, &u.Address.Upazila, &u.Address.LocalAddress,
+			&u.Zila, &u.Upazila, &u.LocalAddress,
 			&u.TotalDonateCount, &u.IsAvailable, &u.LastDonatedAt,
 		)
 		if err != nil {
@@ -167,8 +167,8 @@ func (r *userRepo) Update(ctx context.Context, userID string, u *domain.User) er
 		WHERE id = $8 AND is_deleted = false`
 
 	result, err := r.db.Exec(ctx, query,
-		u.Name, u.BloodGroup, u.Gender, u.Address.Zila, u.Address.Upazila,
-		u.Address.LocalAddress, u.IsAvailable, userID,
+		u.Name, u.BloodGroup, u.Gender, u.Zila, u.Upazila,
+		u.LocalAddress, u.IsAvailable, userID,
 	)
 
 	if err != nil {
