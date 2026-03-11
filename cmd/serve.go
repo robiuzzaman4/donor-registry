@@ -24,6 +24,12 @@ func Serve() {
 		os.Exit(1)
 	}
 
+	// run migrations
+	if err := db.RunMigrations(ctx, dbConn, "migrations"); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	// start server
 	server := rest.NewServer(cnf, ctx, dbConn)
 	server.Start()

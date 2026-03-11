@@ -7,6 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/robiuzzaman4/donor-registry-backend/internal/domain"
 	"github.com/robiuzzaman4/donor-registry-backend/internal/user"
 )
@@ -44,6 +45,7 @@ func (r *userRepo) Create(ctx context.Context, u *domain.User) (*domain.User, er
 
 func (r *userRepo) GetByID(ctx context.Context, userID string) (*domain.User, error) {
 	var u domain.User
+	var lastDonated pgtype.Timestamptz
 	query := `
 		SELECT id, name, phone, password, blood_group, role, gender, date_of_birth,
 		       zila, upazila, local_address, total_donate_count, is_verified, 
@@ -54,7 +56,7 @@ func (r *userRepo) GetByID(ctx context.Context, userID string) (*domain.User, er
 	err := r.db.QueryRow(ctx, query, userID).Scan(
 		&u.ID, &u.Name, &u.Phone, &u.Password, &u.BloodGroup, &u.Role, &u.Gender, &u.DateOfBirth,
 		&u.Zila, &u.Upazila, &u.LocalAddress,
-		&u.TotalDonateCount, &u.IsVerified, &u.IsAvailable, &u.LastDonatedAt, &u.CreatedAt, &u.UpdatedAt,
+		&u.TotalDonateCount, &u.IsVerified, &u.IsAvailable, &lastDonated, &u.CreatedAt, &u.UpdatedAt,
 	)
 
 	if err != nil {
@@ -63,11 +65,15 @@ func (r *userRepo) GetByID(ctx context.Context, userID string) (*domain.User, er
 		}
 		return nil, fmt.Errorf("Failed to get user by id: %w", err)
 	}
+	if lastDonated.Valid {
+		u.LastDonatedAt = lastDonated.Time
+	}
 	return &u, nil
 }
 
 func (r *userRepo) GetByPhone(ctx context.Context, phone string) (*domain.User, error) {
 	var u domain.User
+	var lastDonated pgtype.Timestamptz
 	query := `
 		SELECT id, name, phone, password, blood_group, role, gender, 
 		       zila, upazila, local_address, total_donate_count, is_available, 
@@ -77,7 +83,7 @@ func (r *userRepo) GetByPhone(ctx context.Context, phone string) (*domain.User, 
 	err := r.db.QueryRow(ctx, query, phone).Scan(
 		&u.ID, &u.Name, &u.Phone, &u.Password, &u.BloodGroup, &u.Role, &u.Gender,
 		&u.Zila, &u.Upazila, &u.LocalAddress,
-		&u.TotalDonateCount, &u.IsAvailable, &u.LastDonatedAt, &u.CreatedAt, &u.UpdatedAt,
+		&u.TotalDonateCount, &u.IsAvailable, &lastDonated, &u.CreatedAt, &u.UpdatedAt,
 	)
 
 	if err != nil {
@@ -85,6 +91,9 @@ func (r *userRepo) GetByPhone(ctx context.Context, phone string) (*domain.User, 
 			return nil, nil
 		}
 		return nil, fmt.Errorf("Failed to get user by phone: %w", err)
+	}
+	if lastDonated.Valid {
+		u.LastDonatedAt = lastDonated.Time
 	}
 	return &u, nil
 }
@@ -119,13 +128,17 @@ func (r *userRepo) List(ctx context.Context, page, limit int) ([]*domain.User, i
 	var users []*domain.User
 	for rows.Next() {
 		var u domain.User
+		var lastDonated pgtype.Timestamptz
 		err := rows.Scan(
 			&u.ID, &u.Name, &u.Phone, &u.BloodGroup, &u.Gender,
 			&u.Zila, &u.Upazila, &u.LocalAddress,
-			&u.TotalDonateCount, &u.IsAvailable, &u.LastDonatedAt,
+			&u.TotalDonateCount, &u.IsAvailable, &lastDonated,
 		)
 		if err != nil {
 			return nil, 0, err
+		}
+		if lastDonated.Valid {
+			u.LastDonatedAt = lastDonated.Time
 		}
 		users = append(users, &u)
 	}
