@@ -13,6 +13,7 @@ import (
 	"github.com/robiuzzaman4/donor-registry-backend/internal/config"
 	"github.com/robiuzzaman4/donor-registry-backend/internal/repository"
 	userhandler "github.com/robiuzzaman4/donor-registry-backend/internal/rest/handler/user"
+	"github.com/robiuzzaman4/donor-registry-backend/internal/rest/middleware"
 	"github.com/robiuzzaman4/donor-registry-backend/internal/user"
 )
 
@@ -43,6 +44,11 @@ func (s *Server) Start() {
 
 	// setup gin router
 	router := gin.Default()
+
+	// cors
+	router.Use(middleware.CORS())
+
+	// routes
 	api := router.Group("/api/v1")
 	{
 		// root route
