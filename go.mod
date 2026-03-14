@@ -1,4 +1,4 @@
-module github.com/robiuzzaman4/donor-registry-backend
+module github.com/robiuzzaman4/donor-registry
 
 go 1.25.0
 

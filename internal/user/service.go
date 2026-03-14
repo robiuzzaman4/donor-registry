@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/robiuzzaman4/donor-registry-backend/internal/domain"
+	"github.com/robiuzzaman4/donor-registry/internal/domain"
 )
 
 type service struct {

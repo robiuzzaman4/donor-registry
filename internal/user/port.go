@@ -3,8 +3,8 @@ package user
 import (
 	"context"
 
-	"github.com/robiuzzaman4/donor-registry-backend/internal/domain"
-	userHandler "github.com/robiuzzaman4/donor-registry-backend/internal/rest/handler/user"
+	"github.com/robiuzzaman4/donor-registry/internal/domain"
+	userHandler "github.com/robiuzzaman4/donor-registry/internal/rest/handler/user"
 )
 
 type Service interface {

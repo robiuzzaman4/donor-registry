@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/domain"
+	"github.com/robiuzzaman4/donor-registry/internal/domain"
 )
 
 // Pagination represents pagination metadata

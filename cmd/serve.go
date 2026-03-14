@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/robiuzzaman4/donor-registry-backend/internal/config"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/infrastructure/db"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/rest"
+	"github.com/robiuzzaman4/donor-registry/internal/config"
+	"github.com/robiuzzaman4/donor-registry/internal/infrastructure/db"
+	"github.com/robiuzzaman4/donor-registry/internal/rest"
 )
 
 func Serve() {

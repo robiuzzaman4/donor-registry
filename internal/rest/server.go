@@ -10,11 +10,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/config"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/repository"
-	userhandler "github.com/robiuzzaman4/donor-registry-backend/internal/rest/handler/user"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/rest/middleware"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/user"
+	"github.com/robiuzzaman4/donor-registry/internal/config"
+	"github.com/robiuzzaman4/donor-registry/internal/repository"
+	userhandler "github.com/robiuzzaman4/donor-registry/internal/rest/handler/user"
+	"github.com/robiuzzaman4/donor-registry/internal/rest/middleware"
+	"github.com/robiuzzaman4/donor-registry/internal/user"
 )
 
 type Server struct {

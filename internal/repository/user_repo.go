@@ -6,10 +6,10 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/domain"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/user"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/robiuzzaman4/donor-registry/internal/domain"
+	"github.com/robiuzzaman4/donor-registry/internal/user"
 )
 
 type userRepo struct {

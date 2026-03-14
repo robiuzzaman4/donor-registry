@@ -2,10 +2,10 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/config"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/domain"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/rest/response"
-	"github.com/robiuzzaman4/donor-registry-backend/internal/util"
+	"github.com/robiuzzaman4/donor-registry/internal/config"
+	"github.com/robiuzzaman4/donor-registry/internal/domain"
+	"github.com/robiuzzaman4/donor-registry/internal/rest/response"
+	"github.com/robiuzzaman4/donor-registry/internal/util"
 )
 
 type Handler struct {
