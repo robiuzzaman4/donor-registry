@@ -1,6 +1,8 @@
 package user
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/robiuzzaman4/donor-registry/internal/config"
 	"github.com/robiuzzaman4/donor-registry/internal/domain"
@@ -51,6 +53,11 @@ func (h *Handler) Login(c *gin.Context) {
 		Phone    string `json:"phone" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
+	type loginRes struct {
+		AccessToken  string      `json:"access_token"`
+		RefreshToken string      `json:"refresh_token"`
+		User         domain.User `json:"user"`
+	}
 
 	if err := c.ShouldBindJSON(&loginReq); err != nil {
 		response.BadRequest(c, "Phone and password are required")
@@ -63,12 +70,28 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	if user == nil {
-		response.Unauthorized(c, "Invalid phone number or password")
+	match := util.CheckPasswordHash(loginReq.Password, user.Password)
+	if !match || user == nil {
+		response.Unauthorized(c, "Invalid credentials")
 		return
 	}
 
-	response.SuccessWithMessage(c, "Login successful", user)
+	accessToken, err := util.GenerateToken(user.ID, string(user.Role), 24*time.Hour)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+	refreshToken, err := util.GenerateToken(user.ID, string(user.Role), 168*time.Hour)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.SuccessWithMessage(c, "Login successful", &loginRes{
+		accessToken,
+		refreshToken,
+		*user,
+	})
 }
 
 // list users
