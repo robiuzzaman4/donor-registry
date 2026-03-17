@@ -112,7 +112,7 @@ func (r *userRepo) List(ctx context.Context, page, limit int) ([]*domain.User, i
 
 	// execute paginated query
 	query := `
-		SELECT id, name, phone, blood_group, gender, zila, upazila, local_address, 
+		SELECT id, name, phone, role, blood_group, gender, zila, upazila, local_address, 
 		       total_donate_count, is_available, last_donated_at
 		FROM users 
 		WHERE is_deleted = false
@@ -130,7 +130,7 @@ func (r *userRepo) List(ctx context.Context, page, limit int) ([]*domain.User, i
 		var u domain.User
 		var lastDonated pgtype.Timestamptz
 		err := rows.Scan(
-			&u.ID, &u.Name, &u.Phone, &u.BloodGroup, &u.Gender,
+			&u.ID, &u.Name, &u.Phone, &u.Role, &u.BloodGroup, &u.Gender,
 			&u.Zila, &u.Upazila, &u.LocalAddress,
 			&u.TotalDonateCount, &u.IsAvailable, &lastDonated,
 		)
