@@ -11,6 +11,5 @@ type Service interface {
 	GetByID(ctx context.Context, userID string) (*domain.User, error)
 	GetByPhone(ctx context.Context, phone string) (*domain.User, error)
 	List(ctx context.Context, page, limit int) ([]*domain.User, int64, error)
-	FindByPhoneAndPassword(ctx context.Context, phone string, password string) (*domain.User, error)
 	Update(ctx context.Context, userID string, user *domain.User) error
 }

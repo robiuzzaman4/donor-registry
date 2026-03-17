@@ -146,26 +146,6 @@ func (r *userRepo) List(ctx context.Context, page, limit int) ([]*domain.User, i
 	return users, total, nil
 }
 
-func (r *userRepo) FindByPhoneAndPassword(ctx context.Context, phone string, password string) (*domain.User, error) {
-	var u domain.User
-	query := `
-		SELECT id, name, phone, password, role 
-		FROM users 
-		WHERE phone = $1 AND password = $2 AND is_deleted = false LIMIT 1`
-
-	err := r.db.QueryRow(ctx, query, phone, password).Scan(
-		&u.ID, &u.Name, &u.Phone, &u.Password, &u.Role,
-	)
-
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("Login lookup failed: %w", err)
-	}
-	return &u, nil
-}
-
 func (r *userRepo) Update(ctx context.Context, userID string, u *domain.User) error {
 	query := `
 		UPDATE users 

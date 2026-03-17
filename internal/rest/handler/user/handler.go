@@ -1,6 +1,8 @@
 package user
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +27,20 @@ func NewHandler(cnf *config.Config, svc Service) *Handler {
 // register handler / create user handler
 func (h *Handler) Register(c *gin.Context) {
 
-	var req domain.User
+	var req struct {
+		Name             string                `json:"name" binding:"required"`
+		Phone            string                `json:"phone" binding:"required"`
+		Password         string                `json:"password" binding:"required"`
+		BloodGroup       domain.UserBloodGroup `json:"blood_group" binding:"required"`
+		Role             domain.UserRole       `json:"role"`
+		Gender           domain.UserGender     `json:"gender" binding:"required"`
+		DateOfBirth      time.Time             `json:"date_of_birth" binding:"required"`
+		Zila             string                `json:"zila"`
+		Upazila          string                `json:"upazila"`
+		LocalAddress     string                `json:"local_address"`
+		TotalDonateCount int                   `json:"total_donate_count"`
+		IsAvailable      bool                  `json:"is_available"`
+	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request body")
 		return
@@ -36,9 +51,22 @@ func (h *Handler) Register(c *gin.Context) {
 		response.BadRequest(c, "Failed to process password")
 		return
 	}
-	req.Password = hashedPassword
+	user := domain.User{
+		Name:             req.Name,
+		Phone:            req.Phone,
+		Password:         hashedPassword,
+		BloodGroup:       req.BloodGroup,
+		Role:             req.Role,
+		Gender:           req.Gender,
+		DateOfBirth:      req.DateOfBirth,
+		Zila:             req.Zila,
+		Upazila:          req.Upazila,
+		LocalAddress:     req.LocalAddress,
+		TotalDonateCount: req.TotalDonateCount,
+		IsAvailable:      req.IsAvailable,
+	}
 
-	res, err := h.svc.Create(c.Request.Context(), &req)
+	res, err := h.svc.Create(c.Request.Context(), &user)
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -54,9 +82,9 @@ func (h *Handler) Login(c *gin.Context) {
 		Password string `json:"password" binding:"required"`
 	}
 	type loginRes struct {
-		AccessToken  string      `json:"access_token"`
-		RefreshToken string      `json:"refresh_token"`
-		User         domain.User `json:"user"`
+		AccessToken  string       `json:"access_token"`
+		RefreshToken string       `json:"refresh_token"`
+		User         *domain.User `json:"user"`
 	}
 
 	if err := c.ShouldBindJSON(&loginReq); err != nil {
@@ -64,14 +92,26 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := h.svc.FindByPhoneAndPassword(c.Request.Context(), loginReq.Phone, loginReq.Password)
+	loginReq.Phone = strings.TrimSpace(loginReq.Phone)
+	loginReq.Password = strings.TrimSpace(loginReq.Password)
+
+	user, err := h.svc.GetByPhone(c.Request.Context(), loginReq.Phone)
 	if err != nil {
 		response.Error(c, err)
 		return
 	}
 
+	if user == nil {
+		response.Unauthorized(c, "Invalid credentials")
+		return
+	}
+
+	fmt.Println("user.Password", user.Password)
+	fmt.Println("loginReq.Password", loginReq.Password)
+
 	match := util.CheckPasswordHash(loginReq.Password, user.Password)
-	if !match || user == nil {
+	fmt.Println("match", match)
+	if !match {
 		response.Unauthorized(c, "Invalid credentials")
 		return
 	}
@@ -87,10 +127,13 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	response.SuccessWithMessage(c, "Login successful", &loginRes{
+	fmt.Println("accessToken", accessToken)
+	fmt.Println("refreshToken", refreshToken)
+
+	response.SuccessWithMessage(c, "Login successful", loginRes{
 		accessToken,
 		refreshToken,
-		*user,
+		user,
 	})
 }
 
@@ -162,3 +205,18 @@ func (h *Handler) Update(c *gin.Context) {
 
 	response.SuccessWithMessage(c, "User Updated", &req)
 }
+
+// {
+//     "name": "Ruhan",
+//     "phone": "01794125984",
+//     "password": "01794125984",
+//     "blood_group": "A+",
+//     "role": "USER",
+//     "gender": "MALE",
+//     "date_of_birth": "2026-03-10T18:00:00.000Z",
+//     "zila": "Chattogram",
+//     "upazila": "Banshkhali",
+//     "local_address": "sfsdfsdfsdfsdf",
+//     "total_donate_count": 0,
+//     "is_available": true
+// }
