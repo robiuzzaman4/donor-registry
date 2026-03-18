@@ -25,7 +25,13 @@ func NewHandler(cnf *config.Config, svc Service) *Handler {
 	}
 }
 
-// register handler / create user handler
+/*
+================================================
+Auth Handlers
+================================================
+*/
+
+// Register handler / Create user handler
 func (h *Handler) Register(c *gin.Context) {
 
 	var req struct {
@@ -76,7 +82,7 @@ func (h *Handler) Register(c *gin.Context) {
 	response.Created(c, res)
 }
 
-// login user handler
+// Login handler
 func (h *Handler) Login(c *gin.Context) {
 	var loginReq struct {
 		Phone    string `json:"phone" binding:"required"`
@@ -157,7 +163,7 @@ func (h *Handler) Login(c *gin.Context) {
 	})
 }
 
-// refresh access token using refresh token
+// Refresh access token using refresh_token handler
 func (h *Handler) Refresh(c *gin.Context) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
@@ -223,7 +229,37 @@ func (h *Handler) Refresh(c *gin.Context) {
 	})
 }
 
-// list users
+// Logout handler
+func (h *Handler) Logout(c *gin.Context) {
+	c.SetCookie(
+		"access_token",
+		"",
+		-1,
+		"/",
+		"",
+		false,
+		true,
+	)
+	c.SetCookie(
+		"refresh_token",
+		"",
+		-1,
+		"/",
+		"",
+		false,
+		true,
+	)
+
+	response.SuccessWithMessage(c, "Logout successful", nil)
+}
+
+/*
+================================================
+User Handlers - Public
+================================================
+*/
+
+// List users handler
 func (h *Handler) List(c *gin.Context) {
 	page, limit, _ := response.ParsePaginationParams(c)
 
@@ -237,7 +273,13 @@ func (h *Handler) List(c *gin.Context) {
 	response.SuccessWithPagination(c, "Donors retrieved successfully", users, pagination)
 }
 
-// get by id
+/*
+================================================
+User Handlers - Protectd
+================================================
+*/
+
+// Get by id handler
 func (h *Handler) GetByID(c *gin.Context) {
 	userID, isFound := c.Params.Get("userID")
 	if userID == "" || !isFound {
@@ -253,7 +295,7 @@ func (h *Handler) GetByID(c *gin.Context) {
 	response.SuccessWithMessage(c, "User retrived", user)
 }
 
-// get by phone
+// Get by phone handler
 func (h *Handler) GetByPhone(c *gin.Context) {
 	phone, isFound := c.Params.Get("phone")
 	if phone == "" || !isFound {
@@ -269,7 +311,7 @@ func (h *Handler) GetByPhone(c *gin.Context) {
 	response.SuccessWithMessage(c, "User retrived", user)
 }
 
-// get current user (protected)
+// Get current user handler
 func (h *Handler) Me(c *gin.Context) {
 	userID, ok := c.Get(middleware.ContextUserIDKey)
 	if !ok {
@@ -291,7 +333,7 @@ func (h *Handler) Me(c *gin.Context) {
 	response.SuccessWithMessage(c, "User retrived", user)
 }
 
-// update
+// Update user handler
 func (h *Handler) Update(c *gin.Context) {
 	userID, isFound := c.Params.Get("userID")
 	if userID == "" || !isFound {
@@ -313,18 +355,3 @@ func (h *Handler) Update(c *gin.Context) {
 
 	response.SuccessWithMessage(c, "User Updated", &req)
 }
-
-// {
-//     "name": "Ruhan",
-//     "phone": "01794125984",
-//     "password": "01794125984",
-//     "blood_group": "A+",
-//     "role": "USER",
-//     "gender": "MALE",
-//     "date_of_birth": "2026-03-10T18:00:00.000Z",
-//     "zila": "Chattogram",
-//     "upazila": "Banshkhali",
-//     "local_address": "sfsdfsdfsdfsdf",
-//     "total_donate_count": 0,
-//     "is_available": true
-// }
