@@ -116,19 +116,38 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := util.GenerateToken(user.ID, string(user.Role), 24*time.Hour)
+	accessTokenExpiry := 24 * time.Hour
+	refreshTokenExpiry := 168 * time.Hour
+
+	accessToken, err := util.GenerateToken(user.ID, string(user.Role), accessTokenExpiry)
 	if err != nil {
 		response.Error(c, err)
 		return
 	}
-	refreshToken, err := util.GenerateToken(user.ID, string(user.Role), 168*time.Hour)
+	refreshToken, err := util.GenerateToken(user.ID, string(user.Role), refreshTokenExpiry)
 	if err != nil {
 		response.Error(c, err)
 		return
 	}
 
-	fmt.Println("accessToken", accessToken)
-	fmt.Println("refreshToken", refreshToken)
+	c.SetCookie(
+		"access_token",                   // name
+		accessToken,                      // value
+		int(accessTokenExpiry.Seconds()), // maxAge in seconds
+		"/",                              // path
+		"",                               // domain (empty for current domain)
+		false,                            // secure (set to true in production/HTTPS)
+		true,                             // httpOnly (prevents JS access)
+	)
+	c.SetCookie(
+		"refresh_token",
+		refreshToken,
+		int(refreshTokenExpiry.Seconds()),
+		"/",
+		"",
+		false, // secure
+		true,  // httpOnly
+	)
 
 	response.SuccessWithMessage(c, "Login successful", loginRes{
 		accessToken,
