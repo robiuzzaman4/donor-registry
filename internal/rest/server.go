@@ -63,6 +63,9 @@ func (s *Server) Start() {
 
 		// public routes
 		userhandler.RegisterPublicRoutes(api, userHandler)
+
+		// protected routes
+		userhandler.RegisterProtectedRoutes(api, userHandler)
 	}
 
 	// server address

@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/robiuzzaman4/donor-registry/internal/config"
 	"github.com/robiuzzaman4/donor-registry/internal/domain"
+	"github.com/robiuzzaman4/donor-registry/internal/rest/middleware"
 	"github.com/robiuzzaman4/donor-registry/internal/rest/response"
 	"github.com/robiuzzaman4/donor-registry/internal/util"
 )
@@ -156,6 +157,72 @@ func (h *Handler) Login(c *gin.Context) {
 	})
 }
 
+// refresh access token using refresh token
+func (h *Handler) Refresh(c *gin.Context) {
+	var req struct {
+		RefreshToken string `json:"refresh_token"`
+	}
+	type refreshRes struct {
+		AccessToken string `json:"access_token"`
+	}
+
+	_ = c.ShouldBindJSON(&req)
+	refreshToken := strings.TrimSpace(req.RefreshToken)
+	if refreshToken == "" {
+		if cookieToken, err := c.Cookie("refresh_token"); err == nil {
+			refreshToken = strings.TrimSpace(cookieToken)
+		}
+	}
+	if refreshToken == "" {
+		response.BadRequest(c, "Refresh token is required")
+		return
+	}
+
+	claims, err := util.ValidateToken(c.Request.Context(), refreshToken)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	userID := claims.ID
+	if userID == "" {
+		response.Error(c, domain.ErrInvalidToken)
+		return
+	}
+	role := claims.Role
+
+	user, err := h.svc.GetByID(c.Request.Context(), userID)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+	if user == nil {
+		response.Error(c, domain.ErrUserNotFound)
+		return
+	}
+
+	accessTokenExpiry := 24 * time.Hour
+	accessToken, err := util.GenerateToken(userID, role, accessTokenExpiry)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	c.SetCookie(
+		"access_token",
+		accessToken,
+		int(accessTokenExpiry.Seconds()),
+		"/",
+		"",
+		false,
+		true,
+	)
+
+	response.SuccessWithMessage(c, "Access token refreshed", refreshRes{
+		AccessToken: accessToken,
+	})
+}
+
 // list users
 func (h *Handler) List(c *gin.Context) {
 	page, limit, _ := response.ParsePaginationParams(c)
@@ -195,6 +262,28 @@ func (h *Handler) GetByPhone(c *gin.Context) {
 	}
 
 	user, err := h.svc.GetByPhone(c, phone)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+	response.SuccessWithMessage(c, "User retrived", user)
+}
+
+// get current user (protected)
+func (h *Handler) Me(c *gin.Context) {
+	userID, ok := c.Get(middleware.ContextUserIDKey)
+	if !ok {
+		response.Error(c, domain.ErrUnauthorized)
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok || userIDStr == "" {
+		response.Error(c, domain.ErrInvalidToken)
+		return
+	}
+
+	user, err := h.svc.GetByID(c.Request.Context(), userIDStr)
 	if err != nil {
 		response.Error(c, err)
 		return
